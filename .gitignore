@@ -12,5 +12,7 @@ deployments/
 *.tsbuildinfo
 
 #Ignore specific Test files (if any of Python)
+./Python/testFolders.py
+./Python/testPinata.py
 StudentBadges/
 
