@@ -1,0 +1,10 @@
+# Backend (Flask + Web3)
+Flask==2.3.3
+web3==6.10.0
+
+# Frontend (Streamlit)
+streamlit==1.33.0
+requests==2.31.0
+
+# Environment Variable Handling
+python-dotenv==1.0.1
