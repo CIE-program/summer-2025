@@ -1,0 +1,42 @@
+[
+  {
+    "student_name": "Madhuri Dixit",
+    "class_semester": "Semester 3",
+    "university": "Ek Do Teen",
+    "badge_type": "TopQuizzer",
+    "grant_date": "2025-05-23",
+    "metadata_uri": "https://gateway.pinata.cloud/ipfs/QmNift59EktmAeQkKWD7s7LMXCGyUY5VqeByqaDLTWPWsp"
+  },
+  {
+    "student_name": "Madhuri Dixit",
+    "class_semester": "Semester 3",
+    "university": "Ek Do Teen",
+    "badge_type": "TopQuizzer",
+    "grant_date": "2025-05-23",
+    "metadata_uri": "https://gateway.pinata.cloud/ipfs/QmNift59EktmAeQkKWD7s7LMXCGyUY5VqeByqaDLTWPWsp"
+  },
+  {
+    "student_name": "Anand",
+    "class_semester": "Semester 5",
+    "university": "PES EC",
+    "badge_type": "PitchMaster",
+    "grant_date": "2025-05-23",
+    "metadata_uri": "https://gateway.pinata.cloud/ipfs/QmSPJ6vr3YdSmvWpnFj4xAiZW7QgqzhbBPZvne8UfrdYtV"
+  },
+  {
+    "student_name": "Anand",
+    "class_semester": "Sem 5",
+    "university": "IIT ",
+    "badge_type": "TopQuizzer",
+    "grant_date": "2025-05-24",
+    "metadata_uri": "https://gateway.pinata.cloud/ipfs/QmbEQ1Mm3UyWcGdCpdR8evfFxkFCvn1wvsSDBqq4X1QWAG"
+  },
+  {
+    "student_name": "Gabbar Singh",
+    "class_semester": "Sem 8",
+    "university": "Ramgarh University",
+    "badge_type": "TopInnovator",
+    "grant_date": "2025-05-24",
+    "metadata_uri": "https://gateway.pinata.cloud/ipfs/QmcP5zyLcKN149RkJKPuGsY7HHik7deZThaYVPwVLca8co"
+  }
+]
