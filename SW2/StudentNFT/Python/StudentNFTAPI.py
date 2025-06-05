@@ -1,3 +1,9 @@
+#Code to create an API in Flask to mint NFT badges using web3.py library
+#Exposes APIs to List and Mint Badges that will be consumed by a front end (Streamlit, Gradio, React.js etc)
+#Created by: Raghavendra Deshmukh, PESU CIE - Industry Mentor
+#Purpose: Summer 2025 Blockchain project internship
+#Credits: Hardhat, ChatGPT, Author's own imagination, Tarun Rama
+
 from flask import Flask, jsonify, request
 import requests
 from web3 import Web3
@@ -16,7 +22,8 @@ load_dotenv()
 contractAddress = os.getenv("SMART_CONTRACT_ADDRESS") #The Address of the deployed Solidity Smart Contract
 privateKey = os.getenv("ACCOUNT_PRIVATE_KEY") #From the 1st locally running Node
 accountAddress = os.getenv("ACCOUNT_ADDRESS") #The Account Address from the 1st locally running Node
-localRPC = "http://127.0.0.1:8545" #The Address of the Server where the Smart Contract is running.  Retrieved from the 
+localRPC = "http://127.0.0.1:8545" #The Address of the Server where the Smart Contract is running. 
+
 #The JSON file of the Smart Contract - The ABI aka Application Binary Interface will be used from this file
 contractJSON = r"E:\Deshmukh2025\PESU-CIE\Projects\StudentNFT\Solidity\artifacts\contracts\StudentNFT.sol\StudentBadgeNFT.json"
 pinataJWT = os.getenv("PINATA_JWT") #JWT Token for Pinata
@@ -80,7 +87,8 @@ def uploadFileToPinata(filePath, name=None, keyValues=None, groupID=None, networ
         "Content-Type": m.content_type
     }
 
-    # POST request
+    # POST request 
+    # Here we use the v3 version of the Pinata API to upload the Files as you would see in the base URL that we are using
     response = requests.post("https://uploads.pinata.cloud/v3/files",
                              headers=headers,
                              data=m,
@@ -95,48 +103,14 @@ def uploadFileToPinata(filePath, name=None, keyValues=None, groupID=None, networ
 
     return responseJSON["data"]
 
-# Upload static image to Pinata
-def uploadFileToPinata1(filePath, name=None, keyValues=None, groupID=None, network="public"):    
-    if not os.path.isfile(filePath):
-        raise FileNotFoundError(f"File not found: {filePath}")
-    name = filePath
-
-    with open(filePath, "rb") as fileData:
-        files = {
-            "file": (os.path.basename(filePath), fileData)
-        }
-        print(f"The files variable is: {files}")
-        data = {
-            "network": network
-        }
-        if name:
-            data["name"] = name
-        if groupID:
-            data["group_id"] = groupID
-        if keyValues:
-            data["keyvalues"] = json.dumps(keyValues)  # must be stringified JSON
-        
-        
-        response = requests.post("https://uploads.pinata.cloud/v3/files",
-                                headers=HEADERS,
-                                files=files,
-                                data=data,
-                                timeout=30)
-
-        print(response)
-
-    if response.status_code != 200:
-        raise requests.HTTPError(f"Upload failed: {response.status_code} - {response.text}")
-
-    responseJSON = response.json()
-    if "data" not in responseJSON or "cid" not in responseJSON["data"]:
-        raise ValueError("Unexpected response format: 'cid' missing")
-
-    return responseJSON["data"]
-
-
 # Upload metadata JSON to Pinata
 def uploadMetadataToPinata(metadata):
+    #In this case we use the older version - v2 of the Pinata API spec to upload the Metadata
+    #Notice that this is the URL: https://api.pinata.cloud/pinning/pinJSONToIPFS and we are pinning the JSON to IPFS
+    #This was one way to share the JSON data as a URL in Pinata earlier.  
+    #TBD - Figure out how to use the latest Pinata API spec to replace this as well.
+    #Also note that we have an option to keep the content that we do not want to publicly expose Private in Pinata.  
+    #We can explore these aspects as well if there is a need.
     url = pinataLegacyURL
     headers = {
         "Authorization": f"Bearer {pinataJWT}",
@@ -227,11 +201,14 @@ def upload_metadata():
     # Upload Certificate PNG file to Pinata
     image_cid = uploadFileToPinata(filePath=str(image_path), name=str(image_path), keyValues={"category": "Badge"})
 
+    #We are framing the Image URL that we hae uploaded to Pinata and we shall then create a Short URL to store it as it will save space
     image_url = f"https://gateway.pinata.cloud/ipfs/{image_cid['cid']}"
     s = pyshorteners.Shortener()
     short_url = s.tinyurl.short(image_url)
-    print(short_url)
+    #print(short_url)
 
+    #This is a sample of the structure that we are using to store the student details and the Image URL for their earned/granted badge
+    #However this can also be a topic to discuss and see what actually should we upload as metadata to Pinata
     pinContent = {
         "image_cid":image_cid['cid'],
         "certificate_url":short_url,
@@ -244,6 +221,8 @@ def upload_metadata():
         ]
     }
     # Construct metadata
+    #The pinataMetadata will be the name for the saved File in Pinata which will be studentname-badgetype
+    #Again, we can think of a format that is more easy to understand but note that this data is internal and not exposed to students or Admin
     metadata = {
         "pinataMetadata" : {"name": f"{student_name}-{badge_type}"},
         "pinataContent": pinContent
@@ -256,6 +235,12 @@ def upload_metadata():
     
 
     # Save to local JSON log
+    #***This code is not of use as of now but leaving it here to use it as a discussion point as it is important to note 
+    # the architectural pattern of why we are doing this versus the technical capability
+    #We are no longer saving the Badge info locally but it will be retrieved dynamically using the API: list_minted_badges
+    #which will call a Solidity function and will retrieve the Indices following which we call another function to get the badge details
+
+    #*** Saving any data that should be retrieved from Blockchain defeats the purpose of the Blockchain itself ***
     record = {
         "student_name": student_name,
         "class_semester": class_semester,
@@ -280,6 +265,7 @@ def upload_metadata():
 
     return jsonify({"metadata_uri": metadataURL}), 200
 
+#Use this API to get the list of Minted Badges directly from Blockchain
 @app.route("/list_minted_badges", methods=["GET"])
 def list_minted_badges():
     #if not os.path.exists(STUDENT_BADGE_DATA):
@@ -331,5 +317,6 @@ def list_minted_badges():
     return jsonify(results), 200
                     
 
+#This is our Main function where all the magic starts.... Let the games begin
 if __name__ == "__main__":
     app.run(debug=True)
