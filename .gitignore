@@ -16,3 +16,6 @@ deployments/
 ./Python/testPinata.py
 StudentBadges/
 Test/
+*.pkl
+*.bin
+pdf_multimodal_db
