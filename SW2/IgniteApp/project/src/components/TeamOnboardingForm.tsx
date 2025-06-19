@@ -4,7 +4,7 @@ import FormField from './FormField';
 import TeamMemberCard from './TeamMemberCard';
 import { validateEmail, validateRequiredFields } from '../utils/validation';
 //import { createWallet } from '../services/walletService';
-import { saveTeamToDatabase, checkForDuplicateEmails } from '../services/databaseService';
+import { saveTeamToDatabase } from '../services/databaseService';
 
 interface TeamMember {
   id: number;
@@ -34,6 +34,16 @@ const TeamOnboardingForm: React.FC = () => {
     captainEmail: '',
     walletAddress: ''
   });
+
+  interface DuplicateCheckResult {
+  hasDuplicates: boolean;
+  duplicates:{
+    teamName?: boolean;
+    emails: string[];
+    srns: string[];
+  };
+  message?: string;
+}
 
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -171,7 +181,7 @@ const TeamOnboardingForm: React.FC = () => {
   };
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const checkForDuplicates = async (): Promise<boolean> => {
+  /*const checkForDuplicates = async (): Promise<boolean> => {
     // Collect all email addresses
     const allEmails = [formData.captainEmail];
     
@@ -200,7 +210,34 @@ const TeamOnboardingForm: React.FC = () => {
       setSubmitStatus('error');
       return false;
     }
-  };
+  };*/
+  function buildDuplicateErrorMessage(duplicates: DuplicateCheckResult['duplicates']): string {
+    let message = '';
+
+    if (duplicates.teamName) {
+     message += 'Team is already registered. ';
+    }
+
+    const emailList = duplicates.emails.join(', ');
+    const srnList = duplicates.srns.join(', ');
+
+    if (duplicates.emails.length > 0 || duplicates.srns.length > 0) {
+      message += 'The following ';
+      if (duplicates.emails.length > 0) {
+        message += `emails are already in use: ${emailList}`;
+      }
+     if (duplicates.emails.length > 0 && duplicates.srns.length > 0) {
+        message += ' and ';
+      }
+      if (duplicates.srns.length > 0) {
+        message += `SRNs are already in use: ${srnList}`;
+      }
+      message += '. ';
+    }
+
+    message += 'Team not created.';
+    return message;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -211,29 +248,10 @@ const TeamOnboardingForm: React.FC = () => {
 
     setIsSubmitting(true);
     setSubmitStatus('idle');
-    //setDuplicateMessage('');
+    setDuplicateMessage('');
 
     try {
-      // Step 1: Check for duplicate emails with existing wallet IDs
-      //const noDuplicates = await checkForDuplicates();
-      
-      //if (!noDuplicates) {
-      //  setIsSubmitting(false);
-      //  return; // Stop submission if duplicates found
-      //}
-
-      // Step 2: Create wallet for the team
-      /*const allEmails: string[] = [
-        formData.captainEmail,
-        ...teamMembers.map((member) => member.email),
-      ];
-      console.log(allEmails)
-      */
-      //const walletResult = await createWallet(allEmails);
-      //const walletResult = true
-      
-      //if (walletResult) {
-      // Step 3: Prepare team data for database
+      //Prepare team data for database
       const teamData = {
       teamName: formData.teamName,
       idea: formData.idea,
@@ -269,7 +287,12 @@ const TeamOnboardingForm: React.FC = () => {
             walletAddress: '',
           });
           setTeamMembers([]);
-        } else {
+        } else if (!dbResult.success && dbResult.data?.hasDuplicates) {
+            const fullMessage = buildDuplicateErrorMessage(dbResult.data.duplicates);
+            setSubmitStatus('duplicate');
+            setDuplicateMessage(fullMessage);
+        } 
+        else{
           throw new Error('Failed to save team data');
         }
     } catch (error) {

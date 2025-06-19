@@ -46,7 +46,7 @@ const WalletManagement: React.FC = () => {
       {/* Top Buttons */}
       <div className="flex justify-between mb-4">
         <button
-          onClick={() => setView('create')}
+          onClick={handleCreateWallet}
           className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700"
         >
           Create Wallet
@@ -136,7 +136,7 @@ const WalletManagement: React.FC = () => {
           <div className="mb-4">
             <input
               type="number"
-              placeholder="Amount (MATIC)"
+              placeholder="Amount (POL)"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               className="w-full px-3 py-2 border rounded text-sm"
