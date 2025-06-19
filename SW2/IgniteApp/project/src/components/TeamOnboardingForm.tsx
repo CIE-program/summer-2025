@@ -437,6 +437,7 @@ const TeamOnboardingForm: React.FC = () => {
                 <div className="flex items-center text-green-600">
                   <CheckCircle className="h-5 w-5 mr-2" />
                   <span>Team registered successfully!</span>
+                  <span>Each member of the Team must visit the Wallet Management Page and Create their Crypto Wallet </span>
                 </div>
               )}
               
